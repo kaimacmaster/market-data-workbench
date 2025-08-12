@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { AgGridReact } from 'ag-grid-react';
 import type { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
 import type { OrderBook, BookEntry } from '../../entities';
-import { defaultGridTheme } from '../../shared/utils/agGridSetup';
+import { lightGridTheme, darkGridTheme } from '../../shared/utils/agGridSetup';
+import { useTheme } from '../../shared/providers';
+import { Text } from '../../ui/text';
 
 interface OrderBookRow extends BookEntry {
   id: string;
@@ -22,6 +24,7 @@ export const OrderBookGrid: React.FC<OrderBookGridProps> = React.memo(({
   const gridRef = useRef<AgGridReact>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const lastOrderBookRef = useRef<OrderBook | null>(null);
+  const { isDark } = useTheme();
 
   const columnDefs: ColDef[] = useMemo(() => [
     {
@@ -76,7 +79,7 @@ export const OrderBookGrid: React.FC<OrderBookGridProps> = React.memo(({
     enableCellTextSelection: false,
     rowSelection: {
       mode: 'singleRow' as const,
-      enableClickSelection: false, // New API instead of suppressRowClickSelection
+      enableClickSelection: false,
     },
     suppressCellFocus: true,
     headerHeight: 32,
@@ -173,17 +176,17 @@ export const OrderBookGrid: React.FC<OrderBookGridProps> = React.memo(({
   return (
     <div className={className} style={{ height: 400, width: '100%' }} data-testid="order-book-grid">
       {!orderBook ? (
-        <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
-          <div className="text-center text-gray-500">
+        <div className="h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded">
+          <div className="text-center text-zinc-500 dark:text-zinc-400">
             <div className="text-2xl mb-2">📊</div>
-            <p>No order book data</p>
-            <p className="text-sm">Waiting for live feed...</p>
+            <Text>No order book data</Text>
+            <Text className="text-sm">Waiting for live feed...</Text>
           </div>
         </div>
       ) : (
         <AgGridReact
           ref={gridRef}
-          theme={defaultGridTheme}
+          theme={isDark ? darkGridTheme : lightGridTheme}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           gridOptions={gridOptions}
@@ -195,13 +198,15 @@ export const OrderBookGrid: React.FC<OrderBookGridProps> = React.memo(({
       )}
       
       {orderBook && (
-        <div className="text-xs text-gray-500 mt-2 px-2">
-          Last update: {new Date(orderBook.ts).toLocaleTimeString()}
-          {orderBook.bids.length > 0 && orderBook.asks.length > 0 && (
-            <span className="ml-4">
-              Spread: {(orderBook.asks[0].price - orderBook.bids[0].price).toFixed(2)}
-            </span>
-          )}
+        <div className="mt-2 px-2">
+          <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+            Last update: {new Date(orderBook.ts).toLocaleTimeString('en-GB')}
+            {orderBook.bids.length > 0 && orderBook.asks.length > 0 && (
+              <span className="ml-4">
+                Spread: {(orderBook.asks[0].price - orderBook.bids[0].price).toFixed(2)}
+              </span>
+            )}
+          </Text>
         </div>
       )}
     </div>

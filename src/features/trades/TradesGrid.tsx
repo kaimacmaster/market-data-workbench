@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { AgGridReact } from 'ag-grid-react';
 import type { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
 import type { Trade } from '../../entities';
-import { defaultGridTheme } from '../../shared/utils/agGridSetup';
+import { lightGridTheme, darkGridTheme } from '../../shared/utils/agGridSetup';
+import { useTheme } from '../../shared/providers';
+import { Text } from '../../ui/text';
 
 interface TradesGridProps {
   trades: Trade[];
@@ -18,16 +20,20 @@ export const TradesGrid: React.FC<TradesGridProps> = React.memo(({
   const gridRef = useRef<AgGridReact>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const previousTradesRef = useRef<Trade[]>([]);
+  const { isDark } = useTheme();
 
   const columnDefs: ColDef[] = useMemo(() => [
     {
       field: 'ts',
       headerName: 'Time',
       width: 80,
-      cellClass: 'text-gray-600 text-sm font-mono',
+      cellClass: (params) => {
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        return isDarkMode ? 'text-zinc-400 text-sm font-mono' : 'text-gray-600 text-sm font-mono';
+      },
       valueFormatter: (params) => {
         const date = new Date(params.value);
-        return date.toLocaleTimeString('en-US', { 
+        return date.toLocaleTimeString('en-GB', { 
           hour12: false,
           hour: '2-digit',
           minute: '2-digit',
@@ -53,7 +59,10 @@ export const TradesGrid: React.FC<TradesGridProps> = React.memo(({
       headerName: 'Size',
       width: 80,
       type: 'rightAligned',
-      cellClass: 'font-mono text-gray-700',
+      cellClass: (params) => {
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        return isDarkMode ? 'font-mono text-zinc-300' : 'font-mono text-gray-700';
+      },
       valueFormatter: (params) => Number(params.value).toFixed(4),
     },
     {
@@ -80,7 +89,7 @@ export const TradesGrid: React.FC<TradesGridProps> = React.memo(({
     enableCellTextSelection: false,
     rowSelection: {
       mode: 'singleRow' as const,
-      enableClickSelection: false, // New API instead of suppressRowClickSelection
+      enableClickSelection: false,
     },
     suppressCellFocus: true,
     headerHeight: 32,
@@ -136,17 +145,17 @@ export const TradesGrid: React.FC<TradesGridProps> = React.memo(({
   return (
     <div className={className} style={{ height: 400, width: '100%' }} data-testid="trades-grid">
       {trades.length === 0 ? (
-        <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
-          <div className="text-center text-gray-500">
+        <div className="h-full flex items-center justify-center bg-zinc-50 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded">
+          <div className="text-center text-zinc-500 dark:text-zinc-400">
             <div className="text-2xl mb-2">💱</div>
-            <p>No recent trades</p>
-            <p className="text-sm">Waiting for live feed...</p>
+            <Text>No recent trades</Text>
+            <Text className="text-sm">Waiting for live feed...</Text>
           </div>
         </div>
       ) : (
         <AgGridReact
           ref={gridRef}
-          theme={defaultGridTheme}
+          theme={isDark ? darkGridTheme : lightGridTheme}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           gridOptions={gridOptions}
@@ -158,13 +167,15 @@ export const TradesGrid: React.FC<TradesGridProps> = React.memo(({
       )}
       
       {trades.length > 0 && (
-        <div className="text-xs text-gray-500 mt-2 px-2">
-          {trades.length} recent trades
-          {trades.length >= maxRows && (
-            <span className="ml-2 text-orange-600">
-              (showing latest {maxRows})
-            </span>
-          )}
+        <div className="mt-2 px-2">
+          <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+            {trades.length} recent trades
+            {trades.length >= maxRows && (
+              <span className="ml-2 text-orange-600 dark:text-orange-400">
+                (showing latest {maxRows})
+              </span>
+            )}
+          </Text>
         </div>
       )}
     </div>

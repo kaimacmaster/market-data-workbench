@@ -5,6 +5,33 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Market Data Workbench</title>
+    <script>
+      // Prevent flash of unstyled content by setting theme class immediately
+      (function() {
+        try {
+          const storedSettings = localStorage.getItem('market-data-workbench-settings');
+          let theme = 'light'; // Default to light
+          
+          if (storedSettings) {
+            const parsed = JSON.parse(storedSettings);
+            theme = parsed.theme || 'light';
+          }
+          
+          let shouldBeDark = false;
+          if (theme === 'dark') {
+            shouldBeDark = true;
+          } else if (theme === 'auto') {
+            shouldBeDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+          
+          if (shouldBeDark) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {
+          // If anything fails, let CSS defaults handle it
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

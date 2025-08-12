@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { Button, Input } from '../../shared/ui';
 import { createSymbol } from '../../entities';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
+import { Subheading } from '../../ui/heading';
+import { Text } from '../../ui/text';
+import { Fieldset } from '../../ui/fieldset';
 
 interface AddSymbolFormProps {
   onAdd: (symbol: any) => void;
@@ -41,54 +45,74 @@ export const AddSymbolForm: React.FC<AddSymbolFormProps> = ({ onAdd, onCancel })
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded-lg bg-gray-50">
-      <h3 className="text-lg font-medium text-gray-900">Add New Symbol</h3>
+    <div className="space-y-4 p-4 border border-zinc-950/10 dark:border-white/10 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
+      <Subheading>Add New Symbol</Subheading>
       
-      <div className="grid grid-cols-2 gap-4">
-        <Input
-          label="Symbol ID"
-          value={formData.id}
-          onChange={handleChange('id')}
-          placeholder="e.g., BTCUSDT"
-          required
-        />
-        <Input
-          label="Display Name"
-          value={formData.displayName}
-          onChange={handleChange('displayName')}
-          placeholder="e.g., Bitcoin/USDT"
-        />
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <Input
-          label="Base Asset"
-          value={formData.base}
-          onChange={handleChange('base')}
-          placeholder="e.g., BTC"
-          required
-        />
-        <Input
-          label="Quote Asset"
-          value={formData.quote}
-          onChange={handleChange('quote')}
-          placeholder="e.g., USDT"
-          required
-        />
-      </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <Fieldset>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Text className="text-sm font-medium mb-1">
+                Symbol ID
+              </Text>
+              <Input
+                value={formData.id}
+                onChange={handleChange('id')}
+                placeholder="e.g., BTCUSDT"
+                required
+              />
+            </div>
+            <div>
+              <Text className="text-sm font-medium mb-1">
+                Display Name
+              </Text>
+              <Input
+                value={formData.displayName}
+                onChange={handleChange('displayName')}
+                placeholder="e.g., Bitcoin/USDT"
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div>
+              <Text className="text-sm font-medium mb-1">
+                Base Asset
+              </Text>
+              <Input
+                value={formData.base}
+                onChange={handleChange('base')}
+                placeholder="e.g., BTC"
+                required
+              />
+            </div>
+            <div>
+              <Text className="text-sm font-medium mb-1">
+                Quote Asset
+              </Text>
+              <Input
+                value={formData.quote}
+                onChange={handleChange('quote')}
+                placeholder="e.g., USDT"
+                required
+              />
+            </div>
+          </div>
+        </Fieldset>
 
-      {error && (
-        <div className="text-red-600 text-sm">{error}</div>
-      )}
+        {error && (
+          <Text className="text-red-600 dark:text-red-400 text-sm">{error}</Text>
+        )}
 
-      <div className="flex gap-2">
-        <Button type="submit" variant="primary">
-          Add Symbol
-        </Button>
-        <Button type="button" variant="secondary" onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
-    </form>
+        <div className="flex gap-2">
+          <Button type="submit" color="blue">
+            Add Symbol
+          </Button>
+          <Button type="button" outline onClick={onCancel}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };

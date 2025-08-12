@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { candleCache } from '../../services/cache';
 import { marketFeed } from '../../services/market-feed';
 import type { Candle } from '../../entities';
+import { useSettings } from './useSettings';
 
 interface UseCandlesOptions {
   symbol: string;
@@ -17,6 +18,7 @@ export const useCandles = ({
   enabled = true 
 }: UseCandlesOptions) => {
   const queryClient = useQueryClient();
+  const { settings } = useSettings();
 
   return useQuery({
     queryKey: ['candles', symbol, interval, limit],

@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../shared/hooks/useSettings';
+import { useTheme } from '../../shared/providers';
+import { Heading } from '../../ui/heading';
+import { Text } from '../../ui/text';
+import { Button } from '../../ui/button';
+import { Fieldset, Legend } from '../../ui/fieldset';
+import { Select } from '../../ui/select';
+import { Input } from '../../ui/input';
+import { Checkbox, CheckboxField } from '../../ui/checkbox';
 
 const Settings: React.FC = () => {
   const {
@@ -8,6 +16,8 @@ const Settings: React.FC = () => {
     resetSettings,
     isLoading,
   } = useSettings();
+  
+  const { themeMode, setThemeMode, isDark } = useTheme();
 
   const [localSettings, setLocalSettings] = useState(settings);
 
@@ -27,279 +37,273 @@ const Settings: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-500">Loading settings...</div>
+        <Text className="text-lg text-zinc-500 dark:text-zinc-400">Loading settings...</Text>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-sm border">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600 mt-1">Configure your Market Data Workbench preferences</p>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-900">
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-white dark:bg-zinc-950 rounded-lg shadow-sm border border-zinc-950/10 dark:border-white/10">
+          <div className="px-6 py-4 border-b border-zinc-950/10 dark:border-white/10">
+            <Heading>Settings</Heading>
+            <Text className="mt-1 text-zinc-600 dark:text-zinc-400">Configure your Market Data Workbench preferences</Text>
+          </div>
 
-        <div className="p-6 space-y-8">
-          {/* Theme Settings */}
-          <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Appearance</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Theme
-                </label>
-                <select
-                  value={localSettings.theme}
-                  onChange={(e) => setLocalSettings(prev => ({ 
-                    ...prev, 
-                    theme: e.target.value as 'light' | 'dark' | 'auto' 
-                  }))}
-                  className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                  <option value="auto">Auto</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Chart Colors
-                </label>
-                <select
-                  value={localSettings.chartTheme}
-                  onChange={(e) => setLocalSettings(prev => ({ 
-                    ...prev, 
-                    chartTheme: e.target.value as 'default' | 'dark' | 'colorful' 
-                  }))}
-                  className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="default">Default</option>
-                  <option value="dark">Dark</option>
-                  <option value="colorful">Colorful</option>
-                </select>
-              </div>
-            </div>
-          </section>
-
-          {/* Data Settings */}
-          <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Data & Performance</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Default Chart Interval
-                </label>
-                <select
-                  value={localSettings.defaultInterval}
-                  onChange={(e) => setLocalSettings(prev => ({ 
-                    ...prev, 
-                    defaultInterval: e.target.value 
-                  }))}
-                  className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="1m">1 minute</option>
-                  <option value="5m">5 minutes</option>
-                  <option value="15m">15 minutes</option>
-                  <option value="1h">1 hour</option>
-                  <option value="1d">1 day</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Update Throttle (ms)
-                </label>
-                <input
-                  type="number"
-                  min="50"
-                  max="1000"
-                  step="10"
-                  value={localSettings.updateThrottle}
-                  onChange={(e) => setLocalSettings(prev => ({ 
-                    ...prev, 
-                    updateThrottle: parseInt(e.target.value) 
-                  }))}
-                  className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  How often to update charts and grids with live data
-                </p>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cache Size (MB)
-                </label>
-                <input
-                  type="number"
-                  min="10"
-                  max="500"
-                  step="10"
-                  value={localSettings.cacheSize}
-                  onChange={(e) => setLocalSettings(prev => ({ 
-                    ...prev, 
-                    cacheSize: parseInt(e.target.value) 
-                  }))}
-                  className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Maximum size for historical data cache
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Indicators Settings */}
-          <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Default Indicators</h2>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={localSettings.defaultIndicators.ema}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      defaultIndicators: {
-                        ...prev.defaultIndicators,
-                        ema: e.target.checked,
-                      }
-                    }))}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700">EMA (14)</span>
-                </label>
+          <div className="p-6 space-y-8">
+            <Fieldset>
+              <Legend>Appearance</Legend>
+              <div className="space-y-6 mt-6">
+                <div>
+                  <Text className="text-sm font-medium mb-2">Theme</Text>
+                  <div className="space-y-2">
+                    <Select
+                      value={themeMode}
+                      onChange={(e) => {
+                        const newTheme = e.target.value as 'light' | 'dark' | 'auto';
+                        setThemeMode(newTheme);
+                        setLocalSettings(prev => ({ ...prev, theme: newTheme }));
+                      }}
+                      className="w-48"
+                    >
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                      <option value="auto">Auto</option>
+                    </Select>
+                    <Text className="text-xs text-zinc-500 dark:text-zinc-400">
+                      Currently using: {isDark ? 'Dark' : 'Light'} theme
+                      {themeMode === 'auto' && ' (following system preference)'}
+                    </Text>
+                  </div>
+                </div>
                 
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={localSettings.defaultIndicators.vwap}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      defaultIndicators: {
-                        ...prev.defaultIndicators,
-                        vwap: e.target.checked,
-                      }
+                <div>
+                  <Text className="text-sm font-medium mb-2">Chart Colours</Text>
+                  <Select
+                    value={localSettings.chartTheme}
+                    onChange={(e) => setLocalSettings(prev => ({ 
+                      ...prev, 
+                      chartTheme: e.target.value as 'default' | 'dark' | 'colorful' 
                     }))}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700">VWAP</span>
-                </label>
-                
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={localSettings.defaultIndicators.rsi}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      defaultIndicators: {
-                        ...prev.defaultIndicators,
-                        rsi: e.target.checked,
-                      }
-                    }))}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700">RSI (14)</span>
-                </label>
-                
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={localSettings.defaultIndicators.bollinger}
-                    onChange={(e) => setLocalSettings(prev => ({
-                      ...prev,
-                      defaultIndicators: {
-                        ...prev.defaultIndicators,
-                        bollinger: e.target.checked,
-                      }
-                    }))}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700">Bollinger Bands</span>
-                </label>
+                    className="w-48"
+                  >
+                    <option value="default">Default</option>
+                    <option value="dark">Dark</option>
+                    <option value="colorful">Colourful</option>
+                  </Select>
+                </div>
               </div>
-            </div>
-          </section>
+            </Fieldset>
 
-          {/* Grid Settings */}
-          <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Grid Display</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Order Book Depth
-                </label>
-                <input
-                  type="number"
-                  min="5"
-                  max="50"
-                  value={localSettings.orderBookDepth}
-                  onChange={(e) => setLocalSettings(prev => ({ 
-                    ...prev, 
-                    orderBookDepth: parseInt(e.target.value) 
-                  }))}
-                  className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Number of price levels to display
-                </p>
+            {/* Data Settings */}
+            <Fieldset>
+              <Legend>Data & Performance</Legend>
+              <div className="space-y-6 mt-6">
+                <div>
+                  <Text className="text-sm font-medium mb-2">
+                    Default Chart Interval
+                  </Text>
+                  <Select
+                    value={localSettings.defaultInterval}
+                    onChange={(e) => setLocalSettings(prev => ({ 
+                      ...prev, 
+                      defaultInterval: e.target.value 
+                    }))}
+                    className="w-48"
+                  >
+                    <option value="1m">1 minute</option>
+                    <option value="5m">5 minutes</option>
+                    <option value="15m">15 minutes</option>
+                    <option value="1h">1 hour</option>
+                    <option value="1d">1 day</option>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Text className="text-sm font-medium mb-2">
+                    Update Throttle (ms)
+                  </Text>
+                  <Input
+                    type="number"
+                    min="50"
+                    max="1000"
+                    step="10"
+                    value={localSettings.updateThrottle}
+                    onChange={(e) => setLocalSettings(prev => ({ 
+                      ...prev, 
+                      updateThrottle: parseInt(e.target.value) 
+                    }))}
+                    className="w-48"
+                  />
+                  <Text className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                    How often to update charts and grids with live data
+                  </Text>
+                </div>
+                
+                <div>
+                  <Text className="text-sm font-medium mb-2">
+                    Cache Size (MB)
+                  </Text>
+                  <Input
+                    type="number"
+                    min="10"
+                    max="500"
+                    step="10"
+                    value={localSettings.cacheSize}
+                    onChange={(e) => setLocalSettings(prev => ({ 
+                      ...prev, 
+                      cacheSize: parseInt(e.target.value) 
+                    }))}
+                    className="w-48"
+                  />
+                  <Text className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                    Maximum size for historical data cache
+                  </Text>
+                </div>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Trades History Limit
-                </label>
-                <input
-                  type="number"
-                  min="10"
-                  max="1000"
-                  value={localSettings.tradesLimit}
-                  onChange={(e) => setLocalSettings(prev => ({ 
-                    ...prev, 
-                    tradesLimit: parseInt(e.target.value) 
-                  }))}
-                  className="block w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  Maximum number of trades to keep in memory
-                </p>
-              </div>
-              
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={localSettings.animateGridUpdates}
-                  onChange={(e) => setLocalSettings(prev => ({ 
-                    ...prev, 
-                    animateGridUpdates: e.target.checked 
-                  }))}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="text-sm font-medium text-gray-700">
-                  Animate grid updates with colors
-                </span>
-              </label>
-            </div>
-          </section>
-        </div>
+            </Fieldset>
 
-        {/* Action Buttons */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between">
-          <button
-            onClick={handleReset}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
-            Reset to Defaults
-          </button>
-          
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Save Settings
-          </button>
+            {/* Indicators Settings */}
+            <Fieldset>
+              <Legend>Default Indicators</Legend>
+              <div className="space-y-6 mt-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <CheckboxField>
+                    <Checkbox
+                      checked={localSettings.defaultIndicators.ema}
+                      onChange={(e) => setLocalSettings(prev => ({
+                        ...prev,
+                        defaultIndicators: {
+                          ...prev.defaultIndicators,
+                          ema: e.target.checked,
+                        }
+                      }))}
+                    />
+                    <Text className="text-sm font-medium">EMA (14)</Text>
+                  </CheckboxField>
+                  
+                  <CheckboxField>
+                    <Checkbox
+                      checked={localSettings.defaultIndicators.vwap}
+                      onChange={(e) => setLocalSettings(prev => ({
+                        ...prev,
+                        defaultIndicators: {
+                          ...prev.defaultIndicators,
+                          vwap: e.target.checked,
+                        }
+                      }))}
+                    />
+                    <Text className="text-sm font-medium">VWAP</Text>
+                  </CheckboxField>
+                  
+                  <CheckboxField>
+                    <Checkbox
+                      checked={localSettings.defaultIndicators.rsi}
+                      onChange={(e) => setLocalSettings(prev => ({
+                        ...prev,
+                        defaultIndicators: {
+                          ...prev.defaultIndicators,
+                          rsi: e.target.checked,
+                        }
+                      }))}
+                    />
+                    <Text className="text-sm font-medium">RSI (14)</Text>
+                  </CheckboxField>
+                  
+                  <CheckboxField>
+                    <Checkbox
+                      checked={localSettings.defaultIndicators.bollinger}
+                      onChange={(e) => setLocalSettings(prev => ({
+                        ...prev,
+                        defaultIndicators: {
+                          ...prev.defaultIndicators,
+                          bollinger: e.target.checked,
+                        }
+                      }))}
+                    />
+                    <Text className="text-sm font-medium">Bollinger Bands</Text>
+                  </CheckboxField>
+                </div>
+              </div>
+            </Fieldset>
+
+            {/* Grid Settings */}
+            <Fieldset>
+              <Legend>Grid Display</Legend>
+              <div className="space-y-6 mt-6">
+                <div>
+                  <Text className="text-sm font-medium mb-2">
+                    Order Book Depth
+                  </Text>
+                  <Input
+                    type="number"
+                    min="5"
+                    max="50"
+                    value={localSettings.orderBookDepth}
+                    onChange={(e) => setLocalSettings(prev => ({ 
+                      ...prev, 
+                      orderBookDepth: parseInt(e.target.value) 
+                    }))}
+                    className="w-48"
+                  />
+                  <Text className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                    Number of price levels to display
+                  </Text>
+                </div>
+                
+                <div>
+                  <Text className="text-sm font-medium mb-2">
+                    Trades History Limit
+                  </Text>
+                  <Input
+                    type="number"
+                    min="10"
+                    max="1000"
+                    value={localSettings.tradesLimit}
+                    onChange={(e) => setLocalSettings(prev => ({ 
+                      ...prev, 
+                      tradesLimit: parseInt(e.target.value) 
+                    }))}
+                    className="w-48"
+                  />
+                  <Text className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                    Maximum number of trades to keep in memory
+                  </Text>
+                </div>
+                
+                <CheckboxField>
+                  <Checkbox
+                    checked={localSettings.animateGridUpdates}
+                    onChange={(e) => setLocalSettings(prev => ({ 
+                      ...prev, 
+                      animateGridUpdates: e.target.checked 
+                    }))}
+                  />
+                  <Text className="text-sm font-medium">
+                    Animate grid updates with colours
+                  </Text>
+                </CheckboxField>
+              </div>
+            </Fieldset>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="px-6 py-4 bg-zinc-50 dark:bg-zinc-800/50 border-t border-zinc-950/10 dark:border-white/10 flex justify-between">
+            <Button
+              onClick={handleReset}
+              outline
+            >
+              Reset to Defaults
+            </Button>
+            
+            <Button
+              onClick={handleSave}
+              color="blue"
+            >
+              Save Settings
+            </Button>
+          </div>
         </div>
       </div>
     </div>

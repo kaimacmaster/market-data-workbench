@@ -1,8 +1,12 @@
 import React, { useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Watchlist } from '../../features/watchlist';
 import { symbolCache } from '../../services/cache';
 import { defaultSymbols } from '../../shared/utils';
+import { Button } from '../../ui/button';
+import { Heading, Subheading } from '../../ui/heading';
+import { Navbar, NavbarSection, NavbarSpacer } from '../../ui/navbar';
+import { Text } from '../../ui/text';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,21 +35,25 @@ export const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Market Data Workbench</h1>
-              <p className="text-gray-600 text-sm">Real-time market data visualization and analysis</p>
-            </div>
-            <Link
-              to="/settings"
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              Settings
-            </Link>
-          </div>
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
+      <header className="bg-white dark:bg-zinc-950 shadow-sm border-b border-zinc-950/10 dark:border-white/10">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <Navbar>
+            <NavbarSection>
+              <div className="flex flex-col">
+                <Heading level={1} className="text-xl font-bold">Market Data Workbench</Heading>
+                <Text className="text-sm text-zinc-500 dark:text-zinc-400">
+                  Real-time market data visualization and analysis
+                </Text>
+              </div>
+            </NavbarSection>
+            <NavbarSpacer />
+            <NavbarSection>
+              <Button href="/settings" outline>
+                Settings
+              </Button>
+            </NavbarSection>
+          </Navbar>
         </div>
       </header>
 
@@ -56,22 +64,22 @@ export const HomePage: React.FC = () => {
           </div>
           
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow border p-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Welcome</h2>
-              <div className="text-gray-600 space-y-3">
-                <p>
+            <div className="bg-white dark:bg-zinc-950 rounded-lg shadow-sm border border-zinc-950/10 dark:border-white/10 p-6">
+              <Subheading className="mb-4">Welcome</Subheading>
+              <div className="space-y-3">
+                <Text>
                   Select a symbol from the watchlist to view detailed market data including:
-                </p>
-                <ul className="list-disc list-inside space-y-1 ml-4">
+                </Text>
+                <ul className="list-disc list-inside space-y-1 ml-4 text-zinc-700 dark:text-zinc-300">
                   <li>Real-time candlestick charts</li>
                   <li>Historical OHLCV data</li>
                   <li>Technical indicators</li>
                   <li>Order book depth</li>
                   <li>Recent trades</li>
                 </ul>
-                <p className="mt-4">
+                <Text className="mt-4">
                   Add symbols to your watchlist to get started.
-                </p>
+                </Text>
               </div>
             </div>
           </div>

@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createChart, LineStyle, LineSeries, CandlestickSeries, type ISeriesApi } from 'lightweight-charts';
 import type { Candle } from '../../entities';
 import { useIndicators, type IndicatorResults } from '../../shared/hooks/useIndicators';
+import { useTheme } from '../../shared/providers';
+import { Checkbox, CheckboxField } from '../../ui/checkbox';
+import { Text } from '../../ui/text';
 
 interface CandlestickChartProps {
   candles: Candle[];
@@ -44,6 +47,7 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
   const [indicatorData, setIndicatorData] = useState<IndicatorResults>({});
   
   const { calculateAllIndicators, isReady } = useIndicators();
+  const { isDark } = useTheme();
 
   // Initialize chart
   useEffect(() => {
@@ -54,12 +58,12 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
         width: chartContainerRef.current.clientWidth,
         height,
         layout: {
-          background: { color: '#ffffff' },
-          textColor: '#333',
+          background: { color: isDark ? '#0a0a0b' : '#ffffff' },
+          textColor: isDark ? '#fafafa' : '#333',
         },
         grid: {
-          vertLines: { color: '#f0f0f0' },
-          horzLines: { color: '#f0f0f0' },
+          vertLines: { color: isDark ? '#27272a' : '#f0f0f0' },
+          horzLines: { color: isDark ? '#27272a' : '#f0f0f0' },
         },
         timeScale: {
           rightOffset: 12,
@@ -69,7 +73,7 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
           secondsVisible: false,
         },
         rightPriceScale: {
-          borderColor: '#f0f0f0',
+          borderColor: isDark ? '#27272a' : '#f0f0f0',
         },
       });
 
@@ -158,7 +162,7 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
     } catch (error) {
       console.error('Error creating chart:', error);
     }
-  }, [height, indicators]);
+  }, [height, indicators, isDark]);
 
   // Update chart data when candles change
   useEffect(() => {
@@ -294,47 +298,39 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
   return (
     <div className={`relative ${className}`}>
       {/* Indicator Controls */}
-      <div className="absolute top-2 left-2 z-10 bg-white/90 backdrop-blur rounded-lg p-2 shadow-sm border">
-        <div className="flex gap-3 text-sm">
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
+      <div className="absolute top-2 left-2 z-10 bg-white/90 dark:bg-zinc-900/90 backdrop-blur rounded-lg p-3 shadow-sm border border-zinc-950/10 dark:border-white/10">
+        <div className="flex flex-wrap gap-3 text-sm">
+          <CheckboxField>
+            <Checkbox
               checked={indicators.ema}
-              onChange={(e) => setIndicators(prev => ({ ...prev, ema: e.target.checked }))}
-              className="w-3 h-3"
+              onChange={(checked) => setIndicators(prev => ({ ...prev, ema: checked }))}
             />
-            <span className="text-blue-600">EMA</span>
-          </label>
+            <Text className="text-blue-600 dark:text-blue-400 font-medium">EMA</Text>
+          </CheckboxField>
           
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
+          <CheckboxField>
+            <Checkbox
               checked={indicators.vwap}
-              onChange={(e) => setIndicators(prev => ({ ...prev, vwap: e.target.checked }))}
-              className="w-3 h-3"
+              onChange={(checked) => setIndicators(prev => ({ ...prev, vwap: checked }))}
             />
-            <span className="text-orange-600">VWAP</span>
-          </label>
+            <Text className="text-orange-600 dark:text-orange-400 font-medium">VWAP</Text>
+          </CheckboxField>
           
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
+          <CheckboxField>
+            <Checkbox
               checked={indicators.bollinger}
-              onChange={(e) => setIndicators(prev => ({ ...prev, bollinger: e.target.checked }))}
-              className="w-3 h-3"
+              onChange={(checked) => setIndicators(prev => ({ ...prev, bollinger: checked }))}
             />
-            <span className="text-purple-600">BB</span>
-          </label>
+            <Text className="text-purple-600 dark:text-purple-400 font-medium">BB</Text>
+          </CheckboxField>
           
-          <label className="flex items-center gap-1 cursor-pointer">
-            <input
-              type="checkbox"
+          <CheckboxField>
+            <Checkbox
               checked={indicators.rsi}
-              onChange={(e) => setIndicators(prev => ({ ...prev, rsi: e.target.checked }))}
-              className="w-3 h-3"
+              onChange={(checked) => setIndicators(prev => ({ ...prev, rsi: checked }))}
             />
-            <span className="text-red-600">RSI</span>
-          </label>
+            <Text className="text-red-600 dark:text-red-400 font-medium">RSI</Text>
+          </CheckboxField>
         </div>
       </div>
       
@@ -345,11 +341,11 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
       />
       
       {candles.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
-          <div className="text-center text-gray-500">
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-lg">
+          <div className="text-center text-zinc-500 dark:text-zinc-400">
             <div className="text-4xl mb-2">📈</div>
-            <p>No chart data available</p>
-            <p className="text-sm">Add some symbols to your watchlist</p>
+            <Text>No chart data available</Text>
+            <Text className="text-sm">Add some symbols to your watchlist</Text>
           </div>
         </div>
       )}
