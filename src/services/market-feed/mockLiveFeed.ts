@@ -4,6 +4,7 @@ import type { Candle, Trade, OrderBook } from '../../entities';
 export class MockLiveFeed extends WebSocketClient {
   private mockTimers: Map<string, number> = new Map();
   private mockPrices: Map<string, number> = new Map();
+  private tradeCounter: number = 0;
 
   constructor() {
     // Override with mock WebSocket URL (we'll simulate the connection)
@@ -46,8 +47,12 @@ export class MockLiveFeed extends WebSocketClient {
   }
 
   subscribe(symbol: string): void {
-    if (this.mockTimers.has(symbol)) {
-      return; // Already subscribed
+    // Check if already subscribed to this symbol
+    if (this.mockTimers.has(`${symbol}-candles`) || 
+        this.mockTimers.has(`${symbol}-trades`) || 
+        this.mockTimers.has(`${symbol}-orderbook`)) {
+      console.log(`MockLiveFeed: Already subscribed to ${symbol}`);
+      return;
     }
 
     console.log(`MockLiveFeed: Subscribing to ${symbol}`);
@@ -65,11 +70,15 @@ export class MockLiveFeed extends WebSocketClient {
   unsubscribe(symbol: string): void {
     console.log(`MockLiveFeed: Unsubscribing from ${symbol}`);
     
-    const timer = this.mockTimers.get(symbol);
-    if (timer) {
-      clearInterval(timer);
-      this.mockTimers.delete(symbol);
-    }
+    // Clear all timers for this symbol
+    const timerKeys = [`${symbol}-candles`, `${symbol}-trades`, `${symbol}-orderbook`];
+    timerKeys.forEach(key => {
+      const timer = this.mockTimers.get(key);
+      if (timer) {
+        clearInterval(timer);
+        this.mockTimers.delete(key);
+      }
+    });
     
     this.mockPrices.delete(symbol);
   }
@@ -132,7 +141,7 @@ export class MockLiveFeed extends WebSocketClient {
       const price = currentPrice + (Math.random() - 0.5) * priceVariation;
       
       const trade: Trade = {
-        id: `${symbol}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `${symbol}-${Date.now()}-${++this.tradeCounter}`,
         symbol,
         price: Number(price.toFixed(2)),
         qty: Number((Math.random() * 10 + 0.1).toFixed(4)),

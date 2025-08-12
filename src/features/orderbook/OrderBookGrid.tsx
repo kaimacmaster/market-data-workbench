@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import type { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 import type { OrderBook, BookEntry } from '../../entities';
+import { defaultGridTheme } from '../../shared/utils/agGridSetup';
 
 interface OrderBookRow extends BookEntry {
   id: string;
@@ -16,14 +15,15 @@ interface OrderBookGridProps {
   className?: string;
 }
 
-export const OrderBookGrid: React.FC<OrderBookGridProps> = ({
+export const OrderBookGrid: React.FC<OrderBookGridProps> = React.memo(({
   orderBook,
   className = '',
 }) => {
   const gridRef = useRef<AgGridReact>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
+  const lastOrderBookRef = useRef<OrderBook | null>(null);
 
-  const columnDefs: ColDef[] = [
+  const columnDefs: ColDef[] = useMemo(() => [
     {
       field: 'side',
       headerName: 'Side',
@@ -63,24 +63,27 @@ export const OrderBookGrid: React.FC<OrderBookGridProps> = ({
       cellClass: 'font-mono text-gray-600 text-sm',
       valueFormatter: (params) => params.value ? Number(params.value).toFixed(2) : '',
     },
-  ];
+  ], []);
 
-  const defaultColDef = {
+  const defaultColDef = useMemo(() => ({
     resizable: false,
     sortable: false,
-    suppressMenu: true,
-  };
+    suppressHeaderMenuButton: true, // New API instead of suppressMenu
+  }), []);
 
-  const gridOptions = {
+  const gridOptions = useMemo(() => ({
     animateRows: false,
     enableCellTextSelection: false,
-    suppressRowClickSelection: true,
+    rowSelection: {
+      mode: 'singleRow' as const,
+      enableClickSelection: false, // New API instead of suppressRowClickSelection
+    },
     suppressCellFocus: true,
     headerHeight: 32,
     rowHeight: 24,
     suppressHorizontalScroll: false,
-    suppressVerticalScroll: false,
-  };
+    alwaysShowVerticalScroll: false,
+  }), []);
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
     setGridApi(params.api);
@@ -140,26 +143,35 @@ export const OrderBookGrid: React.FC<OrderBookGridProps> = ({
 
   // Update grid when orderBook changes
   useEffect(() => {
-    if (!gridApi || !orderBook) return;
+    if (!gridApi || !orderBook) {
+      lastOrderBookRef.current = null;
+      return;
+    }
 
     try {
-      const newRows = transformOrderBookToRows(orderBook);
+      const currentRows = transformOrderBookToRows(orderBook);
       
-      // Use applyTransactionAsync for smooth updates
-      gridApi.applyTransactionAsync({
-        remove: [], // Remove all existing rows
-        add: newRows,
-      }, () => {
+      // Only update if this is the first update or timestamp changed
+      if (!lastOrderBookRef.current || lastOrderBookRef.current.ts !== orderBook.ts) {
+        // Clear existing data and set new data
+        gridApi.setGridOption('rowData', currentRows);
+        
         // Auto-size columns after update
-        gridApi.sizeColumnsToFit();
-      });
+        setTimeout(() => {
+          if (gridApi) {
+            gridApi.sizeColumnsToFit();
+          }
+        }, 0);
+        
+        lastOrderBookRef.current = orderBook;
+      }
     } catch (error) {
       console.error('Error updating order book grid:', error);
     }
   }, [orderBook, gridApi, transformOrderBookToRows]);
 
   return (
-    <div className={`ag-theme-alpine ${className}`} style={{ height: 400, width: '100%' }} data-testid="order-book-grid">
+    <div className={className} style={{ height: 400, width: '100%' }} data-testid="order-book-grid">
       {!orderBook ? (
         <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
           <div className="text-center text-gray-500">
@@ -171,6 +183,7 @@ export const OrderBookGrid: React.FC<OrderBookGridProps> = ({
       ) : (
         <AgGridReact
           ref={gridRef}
+          theme={defaultGridTheme}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           gridOptions={gridOptions}
@@ -193,4 +206,4 @@ export const OrderBookGrid: React.FC<OrderBookGridProps> = ({
       )}
     </div>
   );
-};
+});

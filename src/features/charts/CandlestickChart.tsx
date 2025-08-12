@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { createChart, LineStyle, type ISeriesApi } from 'lightweight-charts';
+import { createChart, LineStyle, LineSeries, CandlestickSeries, type ISeriesApi } from 'lightweight-charts';
 import type { Candle } from '../../entities';
 import { useIndicators, type IndicatorResults } from '../../shared/hooks/useIndicators';
 
@@ -77,33 +77,17 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
       let candlestickSeries = null;
       
       try {
-        // Approach 1: Direct method call
-        if ((chart as any).addCandlestickSeries) {
-          candlestickSeries = (chart as any).addCandlestickSeries({
-            upColor: '#4caf50',
-            downColor: '#f44336',
-            borderDownColor: '#f44336',
-            borderUpColor: '#4caf50',
-            wickDownColor: '#f44336',
-            wickUpColor: '#4caf50',
-          });
-        }
+        // Use the proper API with imported CandlestickSeries
+        candlestickSeries = chart.addSeries(CandlestickSeries, {
+          upColor: '#4caf50',
+          downColor: '#f44336',
+          borderDownColor: '#f44336',
+          borderUpColor: '#4caf50',
+          wickDownColor: '#f44336',
+          wickUpColor: '#4caf50',
+        });
       } catch (e1) {
-        try {
-          // Approach 2: Generic addSeries method
-          if ((chart as any).addSeries) {
-            candlestickSeries = (chart as any).addSeries('candlestick' as any, {
-              upColor: '#4caf50',
-              downColor: '#f44336',
-              borderDownColor: '#f44336',
-              borderUpColor: '#4caf50',
-              wickDownColor: '#f44336',
-              wickUpColor: '#4caf50',
-            });
-          }
-        } catch (e2) {
-          console.error('Unable to create candlestick series');
-        }
+        console.error('Unable to create candlestick series:', e1);
       }
 
       chartRef.current = chart;
@@ -112,10 +96,9 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
       // Initialize indicator series
       if (indicators.ema) {
         try {
-          indicatorSeriesRef.current.ema = (chart as any).addLineSeries({
+          indicatorSeriesRef.current.ema = chart.addSeries(LineSeries, {
             color: '#2196F3',
             lineWidth: 2,
-            title: 'EMA (14)',
           });
         } catch (e) {
           console.warn('Could not add EMA series:', e);
@@ -124,10 +107,9 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
       
       if (indicators.vwap) {
         try {
-          indicatorSeriesRef.current.vwap = (chart as any).addLineSeries({
+          indicatorSeriesRef.current.vwap = chart.addSeries(LineSeries, {
             color: '#FF9800',
             lineWidth: 2,
-            title: 'VWAP',
           });
         } catch (e) {
           console.warn('Could not add VWAP series:', e);
@@ -136,22 +118,19 @@ export const CandlestickChart: React.FC<CandlestickChartProps> = ({
       
       if (indicators.bollinger) {
         try {
-          indicatorSeriesRef.current.bollingerUpper = (chart as any).addLineSeries({
+          indicatorSeriesRef.current.bollingerUpper = chart.addSeries(LineSeries, {
             color: '#9C27B0',
             lineWidth: 1,
             lineStyle: LineStyle.Dashed,
-            title: 'BB Upper',
           });
-          indicatorSeriesRef.current.bollingerMiddle = (chart as any).addLineSeries({
+          indicatorSeriesRef.current.bollingerMiddle = chart.addSeries(LineSeries, {
             color: '#9C27B0',
             lineWidth: 1,
-            title: 'BB Middle',
           });
-          indicatorSeriesRef.current.bollingerLower = (chart as any).addLineSeries({
+          indicatorSeriesRef.current.bollingerLower = chart.addSeries(LineSeries, {
             color: '#9C27B0',
             lineWidth: 1,
             lineStyle: LineStyle.Dashed,
-            title: 'BB Lower',
           });
         } catch (e) {
           console.warn('Could not add Bollinger Bands series:', e);

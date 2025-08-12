@@ -16,11 +16,17 @@ export const useLiveData = (symbol?: string) => {
   });
 
   const handleConnectionStateChange = useCallback((event: any) => {
+    const newState = event.detail.state;
     setState(prev => ({
       ...prev,
-      connectionState: event.detail.state,
+      connectionState: newState,
     }));
-  }, []);
+    
+    // Subscribe to symbol when connection becomes ready
+    if (newState === 'connected' && symbol) {
+      mockLiveFeed.subscribe(symbol);
+    }
+  }, [symbol]);
 
   const handleCandle = useCallback((event: any) => {
     if (event.detail.symbol === symbol) {
@@ -71,10 +77,13 @@ export const useLiveData = (symbol?: string) => {
     };
   }, [handleConnectionStateChange, handleCandle, handleTrade, handleOrderBook]);
 
-  // Subscribe to symbol when it changes
+  // Subscribe to symbol when it changes or connection becomes ready
   useEffect(() => {
-    if (symbol && mockLiveFeed.connectionState === 'connected') {
-      mockLiveFeed.subscribe(symbol);
+    if (symbol) {
+      // Subscribe immediately if connected, otherwise it will happen in connectionStateChange handler
+      if (mockLiveFeed.connectionState === 'connected') {
+        mockLiveFeed.subscribe(symbol);
+      }
     }
 
     return () => {

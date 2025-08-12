@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import type { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
 import type { Trade } from '../../entities';
+import { defaultGridTheme } from '../../shared/utils/agGridSetup';
 
 interface TradesGridProps {
   trades: Trade[];
@@ -11,16 +10,16 @@ interface TradesGridProps {
   maxRows?: number;
 }
 
-export const TradesGrid: React.FC<TradesGridProps> = ({
+export const TradesGrid: React.FC<TradesGridProps> = React.memo(({
   trades,
   className = '',
   maxRows = 100,
 }) => {
   const gridRef = useRef<AgGridReact>(null);
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
-  const [displayedTrades, setDisplayedTrades] = useState<Trade[]>([]);
+  const previousTradesRef = useRef<Trade[]>([]);
 
-  const columnDefs: ColDef[] = [
+  const columnDefs: ColDef[] = useMemo(() => [
     {
       field: 'ts',
       headerName: 'Time',
@@ -68,18 +67,21 @@ export const TradesGrid: React.FC<TradesGridProps> = ({
       },
       valueFormatter: (params) => params.value?.toUpperCase(),
     },
-  ];
+  ], []);
 
-  const defaultColDef = {
+  const defaultColDef = useMemo(() => ({
     resizable: false,
     sortable: false,
-    suppressMenu: true,
-  };
+    suppressHeaderMenuButton: true, // New API instead of suppressMenu
+  }), []);
 
-  const gridOptions = {
+  const gridOptions = useMemo(() => ({
     animateRows: true,
     enableCellTextSelection: false,
-    suppressRowClickSelection: true,
+    rowSelection: {
+      mode: 'singleRow' as const,
+      enableClickSelection: false, // New API instead of suppressRowClickSelection
+    },
     suppressCellFocus: true,
     headerHeight: 32,
     rowHeight: 24,
@@ -98,82 +100,41 @@ export const TradesGrid: React.FC<TradesGridProps> = ({
       
       return undefined;
     },
-  };
+  }), []);
 
   const onGridReady = useCallback((params: GridReadyEvent) => {
     setGridApi(params.api);
   }, []);
 
-  // Update displayed trades when trades prop changes
+  // Update grid when trades change - simplified approach
   useEffect(() => {
-    if (!gridApi) return;
+    if (!gridApi) {
+      previousTradesRef.current = [];
+      return;
+    }
 
     // Keep only the most recent trades
-    const recentTrades = trades
+    const currentTrades = trades
       .sort((a, b) => b.ts - a.ts) // Most recent first
       .slice(0, maxRows);
 
-    setDisplayedTrades(recentTrades);
-
-    try {
-      // Use applyTransactionAsync for smooth updates
-      if (recentTrades.length > 0) {
-        // For trades, we typically want to show newest first
-        // and add new trades to the top
-        const newTrades = recentTrades.filter(trade => 
-          !displayedTrades.some(existing => existing.id === trade.id)
-        );
-
-        if (newTrades.length > 0) {
-          gridApi.applyTransactionAsync({
-            add: newTrades,
-            addIndex: 0, // Add to the top
-          });
-
-          // Remove excess trades from the bottom to maintain maxRows
-          const currentRowCount = gridApi.getDisplayedRowCount();
-          if (currentRowCount > maxRows) {
-            const rowsToRemove: Trade[] = [];
-            for (let i = maxRows; i < currentRowCount; i++) {
-              const rowNode = gridApi.getDisplayedRowAtIndex(i);
-              if (rowNode) {
-                rowsToRemove.push(rowNode.data);
-              }
-            }
-            
-            if (rowsToRemove.length > 0) {
-              gridApi.applyTransactionAsync({
-                remove: rowsToRemove,
-              });
-            }
-          }
-        }
-      } else {
-        // If no trades, clear the grid
-        gridApi.applyTransactionAsync({
-          remove: displayedTrades,
-        });
+    // Check if trades have actually changed
+    const previousTradeIds = previousTradesRef.current.map(t => t.id).join(',');
+    const currentTradeIds = currentTrades.map(t => t.id).join(',');
+    
+    if (previousTradeIds !== currentTradeIds) {
+      try {
+        // Use setGridOption for better performance and less interference
+        gridApi.setGridOption('rowData', currentTrades);
+        previousTradesRef.current = currentTrades;
+      } catch (error) {
+        console.error('Error updating trades grid:', error);
       }
-    } catch (error) {
-      console.error('Error updating trades grid:', error);
     }
-  }, [trades, gridApi, maxRows, displayedTrades]);
-
-  // Initial data load
-  useEffect(() => {
-    if (gridApi && displayedTrades.length === 0 && trades.length > 0) {
-      const initialTrades = trades
-        .sort((a, b) => b.ts - a.ts)
-        .slice(0, maxRows);
-      
-      gridApi.applyTransactionAsync({
-        add: initialTrades,
-      });
-    }
-  }, [gridApi, displayedTrades.length, trades, maxRows]);
+  }, [trades, gridApi, maxRows]);
 
   return (
-    <div className={`ag-theme-alpine ${className}`} style={{ height: 400, width: '100%' }} data-testid="trades-grid">
+    <div className={className} style={{ height: 400, width: '100%' }} data-testid="trades-grid">
       {trades.length === 0 ? (
         <div className="h-full flex items-center justify-center bg-gray-50 border-2 border-dashed border-gray-300 rounded">
           <div className="text-center text-gray-500">
@@ -185,12 +146,13 @@ export const TradesGrid: React.FC<TradesGridProps> = ({
       ) : (
         <AgGridReact
           ref={gridRef}
+          theme={defaultGridTheme}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           gridOptions={gridOptions}
           onGridReady={onGridReady}
           rowData={[]} // Data is managed via applyTransactionAsync
-          getRowId={(params) => params.data.id}
+          getRowId={(params) => params.data?.id || `fallback-${Math.random()}`}
           suppressRowTransform={true}
         />
       )}
@@ -207,4 +169,4 @@ export const TradesGrid: React.FC<TradesGridProps> = ({
       )}
     </div>
   );
-};
+});
