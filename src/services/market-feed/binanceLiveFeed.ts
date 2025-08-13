@@ -141,12 +141,6 @@ export class BinanceLiveFeed extends WebSocketClient {
     }));
   }
 
-  disconnect() {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
-    this.subscribedSymbols.clear();
-  }
 }
 
 export const binanceLiveFeed = new BinanceLiveFeed();
