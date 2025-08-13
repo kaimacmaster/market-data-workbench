@@ -77,6 +77,54 @@ export const SymbolPage: React.FC = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Market Stats Bar */}
+        {candles?.length && (
+          <div className="bg-white dark:bg-zinc-950 rounded-lg border border-zinc-950/10 dark:border-white/10 p-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <Text className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Last Price</Text>
+                <Text className="text-xl font-mono font-bold">
+                  £{candles[candles.length - 1].c.toFixed(2)}
+                </Text>
+              </div>
+              <div>
+                <Text className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">24h Change</Text>
+                {candles.length >= 2 ? 
+                  (() => {
+                    const current = candles[candles.length - 1].c;
+                    const prev = candles[0].c;
+                    const change = ((current - prev) / prev) * 100;
+                    const changeValue = current - prev;
+                    return (
+                      <div>
+                        <Text className={`text-lg font-mono font-bold ${change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {change >= 0 ? '+' : ''}£{changeValue.toFixed(2)}
+                        </Text>
+                        <Text className={`text-sm font-mono ${change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {change >= 0 ? '+' : ''}{change.toFixed(2)}%
+                        </Text>
+                      </div>
+                    );
+                  })()
+                  : <Text className="text-lg font-mono font-bold">--</Text>
+                }
+              </div>
+              <div>
+                <Text className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">24h High</Text>
+                <Text className="text-lg font-mono font-bold">
+                  £{Math.max(...candles.map(c => c.h)).toFixed(2)}
+                </Text>
+              </div>
+              <div>
+                <Text className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">24h Low</Text>
+                <Text className="text-lg font-mono font-bold">
+                  £{Math.min(...candles.map(c => c.l)).toFixed(2)}
+                </Text>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Chart Area - Main content */}
           <div className="lg:col-span-3">
@@ -133,30 +181,6 @@ export const SymbolPage: React.FC = () => {
                   <Badge color={isLoading ? 'amber' : candles?.length ? 'green' : 'zinc'}>
                     {isLoading ? 'Loading...' : candles?.length ? 'Active' : 'No Data'}
                   </Badge>
-                </div>
-                <div>
-                  <Text className="text-sm text-zinc-500 dark:text-zinc-400">Last Price</Text>
-                  <Text className="font-mono text-lg font-medium">
-                    {(candles?.length ?? 0) > 0 ? `£${candles![candles!.length - 1].c.toFixed(2)}` : '--'}
-                  </Text>
-                </div>
-                <div>
-                  <Text className="text-sm text-zinc-500 dark:text-zinc-400">24hr Change</Text>
-                  <Text className="font-mono">
-                    {(candles?.length ?? 0) >= 2 ? 
-                      (() => {
-                        const current = candles![candles!.length - 1].c;
-                        const prev = candles![0].c;
-                        const change = ((current - prev) / prev) * 100;
-                        return (
-                          <Badge color={change >= 0 ? 'green' : 'red'}>
-                            {change >= 0 ? '+' : ''}{change.toFixed(2)}%
-                          </Badge>
-                        );
-                      })()
-                      : '--'
-                    }
-                  </Text>
                 </div>
                 <div>
                   <Text className="text-sm text-zinc-500 dark:text-zinc-400">Live Data</Text>

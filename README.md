@@ -212,15 +212,77 @@ export const mountCandle = (el: HTMLElement) => {
 
 ---
 
-## How to run locally (dev data)
+## Data Sources & Configuration
 
-- Default adapter uses a public crypto feed over WebSocket (configurable env var).
-- Includes a **mock feed** for deterministic tests and demo.
+The application supports multiple data sources configured via environment variables:
 
-```
-VITE_FEED=mock            # mock | binance | custom
+### Available Data Feeds
+
+#### Mock Feed (Default)
+```bash
+VITE_FEED=mock
 VITE_DEFAULT_SYMBOL=BTCUSDT
 ```
+- **Historical Data**: Generated mock OHLCV data
+- **Live Data**: Simulated trades, order book, and candles
+- **Use Case**: Development, testing, demos without API dependencies
+
+#### Binance Feed
+```bash
+VITE_FEED=binance
+VITE_DEFAULT_SYMBOL=BTCUSDT
+```
+- **Historical Data**: Real OHLCV data from Binance REST API (`/api/v3/klines`)
+- **Live Data**: Enhanced mock data based on real Binance prices
+  - Fetches current prices from Binance API (`/api/v3/ticker/price`)
+  - Generates realistic trades and order book around actual prices
+  - Updates every 500ms for trades/order book, 1 second for charts
+- **Use Case**: Real market data testing, production-like development
+
+### Data Source Breakdown
+
+| Component | Mock Feed | Binance Feed |
+|-----------|-----------|--------------|
+| **Chart Candles** | Generated mock data | Real Binance OHLCV data |
+| **24h Stats** | Mock calculations | Real high/low/change from Binance |
+| **Live Trades** | Simulated random trades | Mock trades based on real prices |
+| **Order Book** | Random bid/ask levels | Mock book with realistic spreads |
+| **Price Updates** | Every 1 second (mock) | Every 1 second (real data) |
+
+### Setup Instructions
+
+#### Development with Mock Data
+1. No setup required - works out of the box
+2. All data is generated locally
+
+#### Development with Real Binance Data
+1. Create `.env` file in project root:
+```bash
+# Market Data Feed Configuration
+VITE_FEED=binance
+VITE_DEFAULT_SYMBOL=BTCUSDT
+```
+
+2. Restart development server:
+```bash
+npm run dev
+```
+
+3. **No API keys required** - uses public Binance endpoints
+4. **Rate limits**: Binance allows ~1200 requests/minute for public data
+5. **Symbol compatibility**: Use valid Binance trading pairs (BTCUSDT, ETHUSDT, etc.)
+
+#### Production Deployment
+Set environment variables in your deployment platform:
+- Vercel: Add to Environment Variables in dashboard
+- Netlify: Add to Site Settings > Environment Variables
+- Docker: Pass via `-e` flag or docker-compose
+
+### Notes
+- **WebSocket streams**: Not implemented (would require complex infrastructure)
+- **Real order book**: Not available via public APIs without WebSocket
+- **Fallback behaviour**: Invalid symbols fallback to BTCUSDT
+- **Cross-origin**: All API calls work client-side (CORS enabled by Binance)
 
 ---
 

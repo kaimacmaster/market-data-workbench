@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { mockLiveFeed } from '../../services/market-feed/mockLiveFeed';
+import { liveFeed } from '../../services/market-feed';
 import type { Trade, OrderBook, Candle } from '../../entities';
 
 interface LiveDataState {
@@ -24,7 +24,7 @@ export const useLiveData = (symbol?: string) => {
     
     // Subscribe to symbol when connection becomes ready
     if (newState === 'connected' && symbol) {
-      mockLiveFeed.subscribe(symbol);
+      liveFeed.subscribe(symbol);
     }
   }, [symbol]);
 
@@ -58,22 +58,22 @@ export const useLiveData = (symbol?: string) => {
   // Connect to live feed when hook is used
   useEffect(() => {
     // Add event listeners
-    mockLiveFeed.addEventListener('connectionStateChange', handleConnectionStateChange);
-    mockLiveFeed.addEventListener('candle', handleCandle);
-    mockLiveFeed.addEventListener('trade', handleTrade);
-    mockLiveFeed.addEventListener('orderbook', handleOrderBook);
+    liveFeed.addEventListener('connectionStateChange', handleConnectionStateChange);
+    liveFeed.addEventListener('candle', handleCandle);
+    liveFeed.addEventListener('trade', handleTrade);
+    liveFeed.addEventListener('orderbook', handleOrderBook);
 
     // Connect if not already connected
-    if (mockLiveFeed.connectionState === 'disconnected') {
-      mockLiveFeed.connect();
+    if (liveFeed.connectionState === 'disconnected') {
+      liveFeed.connect();
     }
 
     return () => {
       // Remove event listeners
-      mockLiveFeed.removeEventListener('connectionStateChange', handleConnectionStateChange);
-      mockLiveFeed.removeEventListener('candle', handleCandle);
-      mockLiveFeed.removeEventListener('trade', handleTrade);
-      mockLiveFeed.removeEventListener('orderbook', handleOrderBook);
+      liveFeed.removeEventListener('connectionStateChange', handleConnectionStateChange);
+      liveFeed.removeEventListener('candle', handleCandle);
+      liveFeed.removeEventListener('trade', handleTrade);
+      liveFeed.removeEventListener('orderbook', handleOrderBook);
     };
   }, [handleConnectionStateChange, handleCandle, handleTrade, handleOrderBook]);
 
@@ -81,21 +81,21 @@ export const useLiveData = (symbol?: string) => {
   useEffect(() => {
     if (symbol) {
       // Subscribe immediately if connected, otherwise it will happen in connectionStateChange handler
-      if (mockLiveFeed.connectionState === 'connected') {
-        mockLiveFeed.subscribe(symbol);
+      if (liveFeed.connectionState === 'connected') {
+        liveFeed.subscribe(symbol);
       }
     }
 
     return () => {
       if (symbol) {
-        mockLiveFeed.unsubscribe(symbol);
+        liveFeed.unsubscribe(symbol);
       }
     };
   }, [symbol]);
 
   const reconnect = useCallback(() => {
-    mockLiveFeed.disconnect();
-    setTimeout(() => mockLiveFeed.connect(), 1000);
+    liveFeed.disconnect();
+    setTimeout(() => liveFeed.connect(), 1000);
   }, []);
 
   return {
@@ -112,13 +112,13 @@ export const useConnectionStatus = () => {
       setConnectionState(event.detail.state);
     };
 
-    mockLiveFeed.addEventListener('connectionStateChange', handleConnectionStateChange);
+    liveFeed.addEventListener('connectionStateChange', handleConnectionStateChange);
     
     // Get initial state
-    setConnectionState(mockLiveFeed.connectionState);
+    setConnectionState(liveFeed.connectionState);
 
     return () => {
-      mockLiveFeed.removeEventListener('connectionStateChange', handleConnectionStateChange);
+      liveFeed.removeEventListener('connectionStateChange', handleConnectionStateChange);
     };
   }, []);
 

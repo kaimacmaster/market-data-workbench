@@ -5,6 +5,7 @@ import { AddSymbolForm } from './AddSymbolForm';
 import { useWatchlist } from './useWatchlist';
 import { Button } from '../../ui/button';
 import { Text } from '../../ui/text';
+import { createSymbol } from '../../entities';
 
 interface WatchlistProps {
   onSymbolSelect: (symbolId: string) => void;
@@ -23,6 +24,21 @@ export const Watchlist: React.FC<WatchlistProps> = ({ onSymbolSelect }) => {
   } = useWatchlist();
 
   const [showAddForm, setShowAddForm] = useState(false);
+
+  const handleAddExampleSymbol = () => {
+    try {
+      const exampleSymbol = createSymbol({
+        id: 'BTCUSDT',
+        base: 'BTC',
+        quote: 'USDT',
+        displayName: 'Bitcoin/Tether',
+        status: 'active'
+      });
+      addSymbol(exampleSymbol);
+    } catch (error) {
+      console.error('Failed to add example symbol:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -123,10 +139,20 @@ export const Watchlist: React.FC<WatchlistProps> = ({ onSymbolSelect }) => {
 
           {symbols.length === 0 && (
             <div className="text-center py-8">
-              <Text className="mb-2 text-zinc-500 dark:text-zinc-400">No symbols in watchlist</Text>
-              <Button onClick={() => setShowAddForm(true)} color="blue">
-                Add your first symbol
-              </Button>
+              <Text className="mb-4 text-zinc-500 dark:text-zinc-400">No symbols in watchlist</Text>
+              <div className="space-y-3">
+                <div>
+                  <Button onClick={handleAddExampleSymbol} color="blue">
+                    Add BTC/USDT Example
+                  </Button>
+                </div>
+                <div>
+                  <Text className="text-xs text-zinc-400 dark:text-zinc-500 mb-2">or</Text>
+                  <Button onClick={() => setShowAddForm(true)} outline>
+                    Add custom symbol
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
         </div>

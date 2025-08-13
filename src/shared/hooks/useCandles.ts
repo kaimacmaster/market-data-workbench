@@ -24,28 +24,7 @@ export const useCandles = ({
     queryKey: ['candles', symbol, interval, limit],
     queryFn: async (): Promise<Candle[]> => {
       try {
-        // First, try to get from cache
-        const cachedCandles = await candleCache.getCandles(symbol, interval, limit);
-        
-        if (cachedCandles.length > 0) {
-          console.log(`Loaded ${cachedCandles.length} candles from cache for ${symbol}`);
-          
-          // Background fetch for latest data
-          marketFeed.getHistoricalCandles(symbol, interval, limit)
-            .then(async (freshCandles) => {
-              if (freshCandles.length > 0) {
-                await candleCache.addCandles(symbol, interval, freshCandles);
-                
-                // Update query cache
-                queryClient.setQueryData(['candles', symbol, interval, limit], freshCandles);
-              }
-            })
-            .catch(console.error);
-          
-          return cachedCandles;
-        }
-
-        // If no cache, fetch fresh data
+        // Always fetch fresh data for real-time updates
         console.log(`Fetching fresh candles for ${symbol}`);
         const freshCandles = await marketFeed.getHistoricalCandles(symbol, interval, limit);
         
@@ -68,8 +47,9 @@ export const useCandles = ({
       }
     },
     enabled,
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 1, // 1 second
     gcTime: 1000 * 60 * 10, // 10 minutes
+    refetchInterval: 1000 // Refresh every 1 second
   });
 };
 

@@ -78,11 +78,11 @@ export const PageSettings: React.FC<PageSettingsProps> = ({ className = '' }) =>
             <CheckboxField>
               <Checkbox
                 checked={localSettings.defaultIndicators.ema}
-                onChange={(e) => setLocalSettings(prev => ({
+                onChange={(checked) => setLocalSettings(prev => ({
                   ...prev,
                   defaultIndicators: {
                     ...prev.defaultIndicators,
-                    ema: e.target.checked,
+                    ema: checked,
                   }
                 }))}
               />
@@ -92,11 +92,11 @@ export const PageSettings: React.FC<PageSettingsProps> = ({ className = '' }) =>
             <CheckboxField>
               <Checkbox
                 checked={localSettings.defaultIndicators.vwap}
-                onChange={(e) => setLocalSettings(prev => ({
+                onChange={(checked) => setLocalSettings(prev => ({
                   ...prev,
                   defaultIndicators: {
                     ...prev.defaultIndicators,
-                    vwap: e.target.checked,
+                    vwap: checked,
                   }
                 }))}
               />
@@ -106,11 +106,11 @@ export const PageSettings: React.FC<PageSettingsProps> = ({ className = '' }) =>
             <CheckboxField>
               <Checkbox
                 checked={localSettings.defaultIndicators.rsi}
-                onChange={(e) => setLocalSettings(prev => ({
+                onChange={(checked) => setLocalSettings(prev => ({
                   ...prev,
                   defaultIndicators: {
                     ...prev.defaultIndicators,
-                    rsi: e.target.checked,
+                    rsi: checked,
                   }
                 }))}
               />
@@ -120,11 +120,11 @@ export const PageSettings: React.FC<PageSettingsProps> = ({ className = '' }) =>
             <CheckboxField>
               <Checkbox
                 checked={localSettings.defaultIndicators.bollinger}
-                onChange={(e) => setLocalSettings(prev => ({
+                onChange={(checked) => setLocalSettings(prev => ({
                   ...prev,
                   defaultIndicators: {
                     ...prev.defaultIndicators,
-                    bollinger: e.target.checked,
+                    bollinger: checked,
                   }
                 }))}
               />
@@ -206,9 +206,9 @@ export const PageSettings: React.FC<PageSettingsProps> = ({ className = '' }) =>
           <CheckboxField>
             <Checkbox
               checked={localSettings.animateGridUpdates}
-              onChange={(e) => setLocalSettings(prev => ({ 
+              onChange={(checked) => setLocalSettings(prev => ({ 
                 ...prev, 
-                animateGridUpdates: e.target.checked 
+                animateGridUpdates: checked 
               }))}
             />
             <Text className="text-sm font-medium">
