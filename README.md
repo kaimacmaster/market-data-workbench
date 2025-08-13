@@ -1,8 +1,8 @@
 # Market Data Workbench (React + TypeScript)
 
-A real‑time, data‑centric UI showcasing FE architecture, performance, and scalability. It pairs **AG Grid** for high‑throughput tabular data with **TradingView Lightweight Charts** for candlesticks, pushes heavy compute into **Web Workers** (via Comlink), and caches snapshots in **IndexedDB** for instant loads.
+A real‑time, for fun, data‑centric UI showcasing FE architecture, performance, and scalability. It pairs **AG Grid** for high‑throughput tabular data with **TradingView Lightweight Charts** for candlesticks, pushes heavy compute into **Web Workers** (via Comlink), and caches snapshots in **IndexedDB** for instant loads.
 
-> **Why this exists**: A compact, production‑lean demo that mirrors a fintech workflow (grid + charts + streaming) and shows leadership across architecture, DX, and performance.
+> **Why this exists**: A compact, production‑lean demo that mirrors a fintech workflow (grid + charts + streaming) and shows leadership across architecture, DX, and performance. This is not meant to be a real application, it was built as a hackathon to learn a bit more about fintech.
 
 ---
 
@@ -203,15 +203,6 @@ export const mountCandle = (el: HTMLElement) => {
 
 ---
 
-## Milestones
-
-- **M1**: Project scaffold, watchlist, symbol route, historical OHLCV cache → instant chart paint
-- **M2**: Live WebSocket feed; trades + order book updating smoothly (AG Grid transactions)
-- **M3**: Indicators in worker; settings persistence; Playwright smoke tests
-- **M4 (optional)**: Rust/WASM EMA vs TS EMA with numbers in README
-
----
-
 ## Data Sources & Configuration
 
 The application supports multiple data sources configured via environment variables:
@@ -282,7 +273,7 @@ Set environment variables in your deployment platform:
 - **WebSocket streams**: Not implemented (would require complex infrastructure)
 - **Real order book**: Not available via public APIs without WebSocket
 - **Fallback behaviour**: Invalid symbols fallback to BTCUSDT
-- **Cross-origin**: All API calls work client-side (CORS enabled by Binance)
+- **Cross-origin**: All API calls work client-side
 
 ---
 
